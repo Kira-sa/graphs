@@ -1,5 +1,5 @@
-FILE_IN = "input3.txt"
-FILE_OUT = "out3.txt"
+FILE_IN = "input4.txt"
+FILE_OUT = "out4.txt"
 
 
 def readInput():

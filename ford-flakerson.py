@@ -24,13 +24,8 @@
 #       иначе XПАРА[xi]=0).
 
 
-from collections import defaultdict
-from math import ulp
-from os import supports_bytes_environ
-
-
-FILE_IN = "input3.txt"
-FILE_OUT = "out3.txt"
+FILE_IN = "input.txt"
+FILE_OUT = "out.txt"
 
 
 class Edge():
@@ -89,12 +84,12 @@ class FlowNetwork():
     def maxFlow(self, source, target):
         """ Считаем максимальный поток """
         path = self.findPath(source, target, [])
-        # print('path after enter MaxFlow: {}'.format(path))
+        print('path after enter MaxFlow: {}'.format(path))
 
-        # for key in self.flow:
-            # print('key:{} flow:{}'.format(key, self.flow[key]))
+        for key in self.flow:
+            print('key:{} flow:{}'.format(key, self.flow[key]))
 
-        # print('-' * 20)
+        print('-' * 20)
 
         while path != None:
             flow = min(res for edge, res in path)
@@ -121,7 +116,8 @@ class FlowNetwork():
 
 
         result = sum(self.flow[edge] for edge in edges)
-
+        
+        
         return result
 
 
