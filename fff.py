@@ -3,14 +3,11 @@
 # https://www.geeksforgeeks.org/maximum-bipartite-matching/
 
 
-from ff import Graph
-
-
 FILE_IN = "input.txt"
 FILE_OUT = "out.txt"
 
 
-def read_input():
+def readInput():
     with open(FILE_IN, 'r', encoding='utf-8') as f:
         k, l = f.readline().split()
         data_size = int(f.readline())  # считываем количество элементов массива, можно применить например для проверки
@@ -32,13 +29,20 @@ def read_input():
         return int(k), int(l), data_size, edges
 
 
+def writeOutput(matches: list):
+    result = "[" + ", ".join(str(i + 1) for i in matches) + "]"
+
+    with open(FILE_OUT, 'w') as f:
+        f.write(result)
+
+
 class Graph:
     def __init__(self, graph, k, l):
         self.graph = graph  # residual graph
         self.k = k
         self.l = l
 
-    def bpm(self, u, matchR, visited):
+    def bpm(self, u, match, visited):
         """ модифицированный рекурсивный поиск в ширину,
             возвращает True, если есть соответствие вершине """
 
@@ -53,14 +57,17 @@ class Graph:
                 # отмечаем вершину проверенной
                 visited[vertex] = True
 
-                '''If job 'vertex' is not assigned to an applicant
-                OR
-                previously assigned applicant for job v (which is matchR[v]) has an alternate job available.
+                """
+                если вершине l не подобрано паросочетание, то сочетаем ее
+                с вершиной vertex (из k) и возвращаем True.
 
-                Since v is marked as visited in the above line, matchR[v] in the following
-                recursive call will not get job 'v' again'''
-                if matchR[vertex] == -1 or self.bpm(matchR[vertex], matchR, visited):
-                    matchR[vertex] = u
+                если для подходящей вершины vertex уже подобрано паросочетание
+                - рекурсивно ищем альтернативу для этой вершины
+
+                Вершины отмеченные посещенными более не проверяются
+                """
+                if match[vertex] == -1 or self.bpm(match[vertex], match, visited):
+                    match[vertex] = u
                     return True
         return False
 
@@ -85,7 +92,7 @@ class Graph:
 
 
 if __name__ == "__main__":
-    k, l, data_size, edges = read_input()
+    k, l, data_size, edges = readInput()
 
     # edges // считанные из файла грани
     # 0:[1, 2, 3, 4]
@@ -101,5 +108,7 @@ if __name__ == "__main__":
             graph[counter][j - 1] = 1
 
     g = Graph(graph, k, l)
-    print ("Maximum number of applicants that can get job is %d " % g.findMaxPairs())
+    matches, matchCount = g.findMaxPairs()  # matches = [4, 3, 2, 1], matchCount = 4
+
+    writeOutput(matches)
 
