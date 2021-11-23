@@ -3,8 +3,8 @@
 # https://www.geeksforgeeks.org/maximum-bipartite-matching/
 
 
-FILE_IN = "input.txt"
-FILE_OUT = "out.txt"
+FILE_IN = "input3.txt"
+FILE_OUT = "out3.txt"
 
 
 def readInput():
@@ -48,27 +48,23 @@ class Graph:
 
         # для всех вершин в 'l'
         for vertex in range(self.l):
-            # смежные вершины (есть грань)
-            isAdjacent = bool(self.graph[u][vertex])
-            # вершина не проверялась
-            isNotVisited = visited[vertex] == False
+            if self.graph[u][vertex]:  # смежные вершины (есть грань)
+                if not visited[vertex]:  # вершина не проверялась
+                    # отмечаем вершину проверенной
+                    visited[vertex] = True
 
-            if isAdjacent and isNotVisited:
-                # отмечаем вершину проверенной
-                visited[vertex] = True
+                    """
+                    если вершине l не подобрано паросочетание, то сочетаем ее
+                    с вершиной vertex (из k) и возвращаем True.
 
-                """
-                если вершине l не подобрано паросочетание, то сочетаем ее
-                с вершиной vertex (из k) и возвращаем True.
+                    если для подходящей вершины vertex уже подобрано паросочетание
+                    - рекурсивно ищем альтернативу для этой вершины
 
-                если для подходящей вершины vertex уже подобрано паросочетание
-                - рекурсивно ищем альтернативу для этой вершины
-
-                Вершины отмеченные посещенными более не проверяются
-                """
-                if match[vertex] == -1 or self.bpm(match[vertex], match, visited):
-                    match[vertex] = u
-                    return True
+                    Вершины отмеченные посещенными более не проверяются
+                    """
+                    if match[vertex] == -1 or self.bpm(match[vertex], match, visited):
+                        match[vertex] = u
+                        return True
         return False
 
 
@@ -78,16 +74,23 @@ class Graph:
         # где i - номер элемента x, matches[i] - номер элемента y,
         # если у x нет пары ->  matches[i] == -1
         matches = [-1] * self.l
+
         # Счетчик найденных пар
         matchCount = 0
 
         # для каждой вершины k
-        for i in range(self.k):
+        for xi in range(self.k):
+            print(xi)
+            print("before: {}".format(matches))
+            a = 23
             # отметим все вершины не посещенными
             visited = [False] * self.l
             # и пойдем проверять, удастся ли найти пару из вершин l
-            if self.bpm(i, matches, visited):
+            if self.bpm(xi, matches, visited):
                 matchCount += 1
+            print("after: {}".format(matches))
+
+        print("end: {}".format(matches))
         return matches, matchCount
 
 
@@ -105,7 +108,8 @@ if __name__ == "__main__":
 
     for counter, i in enumerate(edges):
         for j in i:
-            graph[counter][j - 1] = 1
+            if j != 0:
+                graph[counter][j - 1] = 1
 
     g = Graph(graph, k, l)
     matches, matchCount = g.findMaxPairs()  # matches = [4, 3, 2, 1], matchCount = 4

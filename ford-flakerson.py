@@ -30,8 +30,8 @@ from os import supports_bytes_environ
 import numpy
 
 
-FILE_IN = "input.txt"
-FILE_OUT = "out.txt"
+FILE_IN = "input3.txt"
+FILE_OUT = "out3.txt"
 
 
 class Edge():
@@ -90,12 +90,12 @@ class FlowNetwork():
     def maxFlow(self, source, target):
         """ Считаем максимальный поток """
         path = self.findPath(source, target, [])
-        print('path after enter MaxFlow: {}'.format(path))
+        # print('path after enter MaxFlow: {}'.format(path))
 
-        for key in self.flow:
-            print('key:{} flow:{}'.format(key, self.flow[key]))
+        # for key in self.flow:
+            # print('key:{} flow:{}'.format(key, self.flow[key]))
 
-        print('-' * 20)
+        # print('-' * 20)
 
         while path != None:
             flow = min(res for edge, res in path)
