@@ -27,7 +27,6 @@
 from collections import defaultdict
 from math import ulp
 from os import supports_bytes_environ
-import numpy
 
 
 FILE_IN = "input3.txt"

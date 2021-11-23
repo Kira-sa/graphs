@@ -25,7 +25,7 @@ def readInput():
 
 
 def writeOutput(matches: list):
-    result = "[" + ", ".join(str(i + 1) for i in matches) + "]"
+    result = "[" + ", ".join(str(i) for i in matches) + "]"
 
     with open(FILE_OUT, 'w') as f:
         f.write(result)
@@ -63,9 +63,6 @@ class Graph:
 
     def findMaxPairs(self):
         """ поиск паросочетаний и подсчет их количества """
-        # список с перечнем совпадений пар (xi; yi),
-        # где i - номер элемента x, matches[i] - номер элемента y,
-        # если у x нет пары ->  matches[i] == -1
         matches = [-1] * self.l
 
         # Счетчик найденных пар
@@ -80,8 +77,16 @@ class Graph:
             # и пойдем проверять, удастся ли найти пару из вершин l
             if self.bpm(xi, matches, visited):
                 matchCount += 1
-                
+
         return matches, matchCount
+    
+    def reverse(self, matches):
+        res = [0] * len(matches)
+        for pos, index in enumerate(matches):
+            if index != 0:
+                res[index - 1] = pos + 1
+        return res
+
 
 
 if __name__ == "__main__":
@@ -102,7 +107,10 @@ if __name__ == "__main__":
                 graph[counter][j - 1] = 1
 
     g = Graph(graph, k, l)
-    matches, matchCount = g.findMaxPairs()  # matches = [4, 3, 2, 1], matchCount = 4
+
+    reversedMatches, matchCount = g.findMaxPairs()  # matches = [4, 3, 2, 1], matchCount = 4
+    reversedMatches = [i + 1 for i in reversedMatches]
+    matches = g.reverse(reversedMatches)
 
     writeOutput(matches)
 
