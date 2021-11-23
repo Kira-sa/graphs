@@ -24,8 +24,8 @@
 #       иначе XПАРА[xi]=0).
 
 
-FILE_IN = "input.txt"
-FILE_OUT = "out.txt"
+FILE_IN = "input4.txt"
+FILE_OUT = "out4.txt"
 
 
 class Edge():
@@ -116,8 +116,10 @@ class FlowNetwork():
 
 
         result = sum(self.flow[edge] for edge in edges)
-        
-        
+        for edge in edges:
+            q = self.flow[edge] 
+            a = 23
+
         return result
 
 
