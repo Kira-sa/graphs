@@ -1,8 +1,3 @@
-# Python program to find
-# maximal Bipartite matching.
-# https://www.geeksforgeeks.org/maximum-bipartite-matching/
-
-
 FILE_IN = "input3.txt"
 FILE_OUT = "out3.txt"
 
@@ -59,8 +54,6 @@ class Graph:
 
                     если для подходящей вершины vertex уже подобрано паросочетание
                     - рекурсивно ищем альтернативу для этой вершины
-
-                    Вершины отмеченные посещенными более не проверяются
                     """
                     if match[vertex] == -1 or self.bpm(match[vertex], match, visited):
                         match[vertex] = u
@@ -80,17 +73,14 @@ class Graph:
 
         # для каждой вершины k
         for xi in range(self.k):
-            print(xi)
-            print("before: {}".format(matches))
-            a = 23
+
             # отметим все вершины не посещенными
             visited = [False] * self.l
+
             # и пойдем проверять, удастся ли найти пару из вершин l
             if self.bpm(xi, matches, visited):
                 matchCount += 1
-            print("after: {}".format(matches))
-
-        print("end: {}".format(matches))
+                
         return matches, matchCount
 
 
