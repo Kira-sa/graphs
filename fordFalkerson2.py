@@ -1,5 +1,10 @@
-FILE_IN = "input5.txt"
-FILE_OUT = "out5.txt"
+FILE_IN = "input3.txt"
+FILE_OUT = "out3.txt"
+
+
+OFFSET = 1  # поправка на +1 для счета с 1, для вывода в файл
+DEBUG_SHOW_FLOW = False
+DEBUG_SHOW_PATH = False
 
 
 def readInput():
@@ -30,6 +35,45 @@ def writeOutput(matches: list):
     with open(FILE_OUT, 'w') as f:
         f.write(result)
 
+
+def fillData(k, l, edges):
+    """ Создание и заполнение графа
+        в соответствии с полученными данными
+    """
+    # создаем "поток"
+    g = FF(k)
+
+    # добавляем дополнительные вершины
+    g.addVertex('s')
+    g.addVertex('t')
+
+    # добавляем k вершин x
+    for i in range(k):
+        g.addVertex('x' + str(i))
+
+    # добавляем l вершин y
+    for i in range(l):
+        g.addVertex('y' + str(i))
+
+    # добавляем грани соединяющие вершину s с вершинами x
+    for i in range(k):
+        g.addEdge('s', 'x' + str(i), 1)
+
+    # добавляем грани соединяющие вершину t с вершинами y
+    for i in range(l):
+        g.addEdge('y' + str(i), 't', 1)
+
+    # добавляем грани между x и y, определенные во входном файле
+    for counter_i, i in enumerate(edges):  # для каждого перечня граней от вершины i(x)
+        for counter_j, value in enumerate(i):   # к вершинам j(y)
+            if value != 0:  # если значение 0, значит от вершины нет граней
+                x = 'x' + str(counter_i)
+                y = 'y' + str(value - 1)
+                g.addEdge(x, y, 1)
+
+    return g
+
+
 class Edge():
     def __init__(self, u, v, w):
         self.source = u
@@ -42,10 +86,12 @@ class Edge():
 
 
 class FF():
-    def __init__(self):
+    def __init__(self, size):
+        self.size = size
         self.adj = {}
         self.flow = {}
-    
+        self.initialGraph = {}
+
     def addVertex(self, vertex):
         self.adj[vertex] = []
 
@@ -67,6 +113,16 @@ class FF():
         self.flow[edge] = 0
         self.flow[redge] = 0
 
+    def printFlow(self):
+        if DEBUG_SHOW_FLOW:
+            for key in self.flow:
+                print('key:{} flow:{}'.format(key, self.flow[key]))
+
+    def printPath(self, text, path):
+        if DEBUG_SHOW_PATH:
+            print('{} {}'.format(text, path))
+
+
     def findPath(self, source, target, path):
         """ Формируем путь """
         if source == target:
@@ -82,45 +138,52 @@ class FF():
 
                 if result != None:
                     return result
-        
+
     def maxFlow(self, source, target):
             """ Считаем максимальный поток """
             path = self.findPath(source, target, [])
-            print('path after enter MaxFlow: {}'.format(path))
 
-            for key in self.flow:
-                print('key:{} flow:{}'.format(key, self.flow[key]))
-
-            print('-' * 20)
+            self.printPath('initial path : ', path)
+            self.printFlow()
 
             while path != None:
                 flow = min(res for edge, res in path)
-                print("counted flow: {}".format(flow))
+                # print("counted flow: {}".format(flow))
 
                 for edge, res in path:
                     self.flow[edge] += flow
                     self.flow[edge.redge] -= flow
 
-                for key in self.flow:
-                    print('{}:{}'.format(key, self.flow[key]))
+                self.printFlow()
 
                 path = self.findPath(source, target, [])
-                print('path inside of while loop: %s' % path)
+                self.printPath('path inside of while loop:', path)
 
-            print("ending")
-            for key in self.flow:
-                print('key:{} flow:{}'.format(key, self.flow[key]))
-
-            print("debug")
             edges = self.getEdges(source)
-            for edge in edges:
-                print("edge: {}, flow: {}".format(edge, self.flow[edge]))
-
             result = sum(self.flow[edge] for edge in edges)
 
             return result
 
+    def getPairs(self):
+        """ Перебираем сформированный поток,
+            удаляем добавленные вершины s и t,
+            берем только те грани, по которым пошел поток ( flow == 1) """
+        for fl in self.flow:
+            if (fl.source not in ('s', 't')):
+                if (fl.target not in ('s', 't')):
+                    if self.flow[fl] == 1:
+                        self.initialGraph[fl] = self.flow[fl]
 
+    def prepareResultList(self):
+        self.getPairs()
+        result = [0] * self.size
+
+        for edge in self.initialGraph:
+            sourceId = int(edge.source[1:])  # обрезаем x и переводим в число
+            targetId = int(edge.target[1:])  # обрезаем y и переводим в число
+            result[sourceId] = targetId + OFFSET
+
+        return result
 
 
 if __name__ == "__main__":
@@ -131,34 +194,11 @@ if __name__ == "__main__":
     # 2:[1, 2]
     # 3:[1]
 
-    # задаём "поток"
-    g = FF()
+    g = fillData(k, l, edges)
 
-    # заводим вершины
-    g.addVertex('s')
-    g.addVertex('t')
+    maxFlow = g.maxFlow('s', 't')  # считаем максимальный поток для заданной системы
+    print("Max flow: {}".format(maxFlow))
 
-    for i in range(k):
-        g.addVertex('x' + str(i))
+    pp = g.prepareResultList()
 
-    for i in range(l):
-        g.addVertex('y' + str(i))
-
-
-    # заводим грани/трубы
-    for i in range(k):
-        g.addEdge('s', 'x' + str(i), 1)
-
-    for i in range(l):
-        g.addEdge('y' + str(i), 't', 1)
-
-
-    for counter_i, i in enumerate(edges):  # для каждого перечня граней от вершины i(x)
-        for counter_j, j in enumerate(i):   # к вершинам j(y)
-            x = 'x' + str(counter_i)
-            y = 'y' + str(counter_j)
-            g.addEdge(x, y, 1)
-
-
-
-    print (g.maxFlow('s', 't'))
+    writeOutput(pp)
