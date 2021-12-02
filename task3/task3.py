@@ -129,7 +129,13 @@ def readInput():
         for i in range(n):
             doors.append([int(i) for i in f.readline().split()])
 
-        prices = [int(i) for i in f.readline().split()]
+
+        prices_raw = f.readlines()
+        prices = []
+        for price_line in prices_raw:
+            raw_price_line = [int(i) for i in price_line.split()]
+            for i in raw_price_line:
+                prices.append(i)
 
         # комнаты - узлы
         # двери - грани
