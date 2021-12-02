@@ -44,6 +44,79 @@ class House():
         return self.rooms[roomN].doors
 
 
+class Graph:
+    def __init__(self, num_of_vertices):
+        self.v = num_of_vertices
+        self.edges = [[0 for i in range(num_of_vertices)] for j in range(num_of_vertices)]
+        self.visited = []
+
+    def add_edge(self, u, v, weight):
+        self.edges[u][v] = weight
+        self.edges[v][u] = weight
+
+    def shortWay(self, source):
+        target = 0
+        processed = []
+        costs = {}
+        parents = {}
+
+        costs[source] = 0
+        parents[source] = 1
+
+        for node, val in enumerate(self.edges[source]):
+            if val > 0:
+                costs[node] = self.edges[source][node]
+                parents[node] = source
+
+        # for n in graph.keys():
+        for n in range(self.v):
+            if n not in costs and n != source:
+                costs[n] = float('inf')
+                parents[n] = None
+
+        node = self.find_lowest_cost(costs, processed)
+
+        while node:
+            cost = costs[node]
+            neigbors = self.edges[node] # [0, 2, 0, 0]
+            # for n in neigbors.keys():
+            for n, val in enumerate(neigbors):
+                # добавить отфильтрацию с ценой 0 (когда нет грани)
+                if val > 0:
+                    new_cost = cost + neigbors[n]
+                    if new_cost < costs[n]:
+                        costs[n] = new_cost
+                        parents[n] = node
+            processed.append(node)
+            node = self.find_lowest_cost(costs, processed)
+
+        # пройти по parents и собрать путь от финиша к старту
+        final_cost = costs[target]
+        result = []
+
+        while parents[target] != source:
+            result.append(parents[target])
+            target = parents[target]
+            if target is None:
+                break
+
+        result.append(source)
+        result.reverse()
+        
+        return final_cost, result
+    
+    def find_lowest_cost(self, costs, processed):
+        lowest_cost = float('inf')
+        lowest_cost_node = None
+        for node in costs:
+            cost = costs[node]
+            # ?? добавить фильтр на 0 стоимость
+            if cost < lowest_cost and node not in processed:
+                lowest_cost = cost
+                lowest_cost_node = node
+        return lowest_cost_node
+
+
 def readInput():
     with open(FILE_IN, 'r', encoding='utf-8') as f:
         # n - число комнат
@@ -90,129 +163,6 @@ def  findPossibleExits(house):
     return result
 
 
-class Graph:
-    def __init__(self, num_of_vertices):
-        self.v = num_of_vertices
-        self.edges = [[-1 for i in range(num_of_vertices)] for j in range(num_of_vertices)]
-        self.visited = []
-
-    def add_edge(self, u, v, weight):
-        self.edges[u][v] = weight
-        self.edges[v][u] = weight
-
-    def dijkstra2(self, src):
-        """ Рассчет стоимости по алг.Дейкстры """
-        visited = []
-        path = []
-        distance = {src: 0}
-        node = list(range(self.v))
-
-        # отмечаем стартовый узел посщенным
-        node.remove(src)
-        visited.append(src)
-        path.append(src)
-        
-        for i in node:
-            distance[i] = self.edges[src][i]
-
-        prefer = src
-        while node:
-            _distance = float('inf')
-            for i in visited:
-                for j in node:
-                    if self.edges[i][j] > 0:
-                        if _distance > distance[i] + self.edges[i][j]:
-                            _distance = distance[j] = distance[i] + self.edges[i][j]
-                            prefer = j
-            visited.append(prefer)
-            node.remove(prefer)
-            path.append(prefer)
-        return path, distance[0]
-
-    def dijkstra3(self, src):
-        nodes = list(range(self.v))
-
-        visited = [src]
-        path = {src:{src:[]}}
-        nodes.remove(src)
-        distance_graph = {src:0}
-        pre = next = src
-
-        while nodes:
-            distance = float('inf')
-            for v in visited:
-                for d in nodes:
-                    new_dist = self.edges[src][v] + self.edges[v][d]
-                    if new_dist <= distance:
-                        distance = new_dist
-                        next = d
-                        pre = v
-                        self.edges[src][d] = new_dist
-
-
-            path[src][next] = [i for i in path[src][pre]]
-            path[src][next].append(next)
-
-            distance_graph[next] = distance
-
-            visited.append(next)
-            nodes.remove(next)
-
-        return distance_graph, path
-
-    def dijkstra(self, source):
-        target = 0
-        processed = []
-        costs = {}
-        parents = {}
-
-        costs[source] = 0
-        parents[source] = 1
-
-        for node in self.edges[source]:
-            costs[node] = self.edges[source][node]
-            parents[node] = source
-
-        for n, val in enumerate(self.edges):
-            if n not in costs and n != source:
-                costs[n] = float('inf')
-                parents[n] = None
-
-        node = self.find_lowest_cost(costs, processed)
-
-        while node:
-            cost = costs[node]
-            neigbors = self.edges[node]
-            for n, val in enumerate(neigbors):
-                new_cost = cost + neigbors[n]
-                if new_cost < costs[n]:
-                    costs[n] = new_cost
-                    parents[n] = node
-            processed.append(node)
-            node = self.find_lowest_cost(costs, processed)
-
-        final_cost = costs[target]
-        result = []
-        result.append(target)
-        while parents[target] != source:
-            result.append(parents[target])
-            target = parents[target]
-            if target is None:
-                break
-            
-        return final_cost, result
-
-    
-    def find_lowest_cost(self, costs, processed):
-        lowest_cost = float('inf')
-        lowest_cost_node = None
-        for node in costs:
-            cost = costs[node]
-            if cost < lowest_cost and node not in processed:
-                lowest_cost = cost
-                lowest_cost_node = node
-        return lowest_cost_node
-
 # получение входных данных и заполнение "дома"
 n, m, startRoom, cash, prices, roomsList = readInput()
 
@@ -241,8 +191,8 @@ for r in house.rooms:
     for d in house.rooms[r].doors:
         g.add_edge(d.source, d.target, d.price)
 
-exitPrice, path = g.dijkstra(startRoom)
+exitPrice, path = g.shortWay(startRoom)
 
 
-writeOutput((exitPrice[0] <= cash), exitPrice, path)
+writeOutput((exitPrice <= cash), exitPrice, path)
 
